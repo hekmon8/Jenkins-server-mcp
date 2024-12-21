@@ -1,70 +1,140 @@
-# jenkins-server MCP Server
+# Jenkins Server MCP
 
-A Model Context Protocol server
+A Model Context Protocol (MCP) server that provides tools for interacting with Jenkins CI/CD servers. This server enables AI assistants to check build statuses, trigger builds, and retrieve build logs through a standardized interface.
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
+## Installation
 
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+1. Clone this repository:
+```bash
+git clone https://github.com/yourusername/jenkins-server-mcp.git
+cd jenkins-server-mcp
+```
 
-## Features
-
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
-
-### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
-
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
-
-## Development
-
-Install dependencies:
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-Build the server:
+3. Build the project:
 ```bash
 npm run build
 ```
+
+## Configuration
+
+The server requires the following environment variables:
+
+- `JENKINS_URL`: The URL of your Jenkins server (defaults to 'http://sohoci.rd.tp-link.net/jenkins')
+- `JENKINS_USER`: Jenkins username for authentication
+- `JENKINS_TOKEN`: Jenkins API token for authentication
+
+Configure these in your MCP settings file:
+
+### For Claude Desktop
+
+MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "jenkins-server": {
+      "command": "node",
+      "args": ["/path/to/jenkins-server-mcp/build/index.js"],
+      "env": {
+        "JENKINS_URL": "https://your-jenkins-server.com",
+        "JENKINS_USER": "your-username",
+        "JENKINS_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+## Tools and Usage
+
+### 1. Get Build Status
+
+Get the status of a Jenkins build:
+
+```typescript
+// Example usage
+const result = await mcpClient.useTool("jenkins-server", "get_build_status", {
+  jobPath: "view/xxx_debug",
+  buildNumber: "lastBuild"  // Optional, defaults to lastBuild
+});
+```
+
+Input Schema:
+```json
+{
+  "jobPath": "string",  // Path to Jenkins job
+  "buildNumber": "string"  // Optional, build number or "lastBuild"
+}
+```
+
+### 2. Trigger Build
+
+Trigger a new Jenkins build with parameters:
+
+```typescript
+// Example usage
+const result = await mcpClient.useTool("jenkins-server", "trigger_build", {
+  jobPath: "view/xxx_debug",
+  parameters: {
+    BRANCH: "main",
+    BUILD_TYPE: "debug"
+  }
+});
+```
+
+Input Schema:
+```json
+{
+  "jobPath": "string",  // Path to Jenkins job
+  "parameters": {
+    // Build parameters as key-value pairs
+  }
+}
+```
+
+### 3. Get Build Log
+
+Retrieve the console output of a Jenkins build:
+
+```typescript
+// Example usage
+const result = await mcpClient.useTool("jenkins-server", "get_build_log", {
+  jobPath: "view/xxx_debug",
+  buildNumber: "lastBuild"
+});
+```
+
+Input Schema:
+```json
+{
+  "jobPath": "string",  // Path to Jenkins job
+  "buildNumber": "string"  // Build number or "lastBuild"
+}
+```
+
+## Development
 
 For development with auto-rebuild:
 ```bash
 npm run watch
 ```
 
-## Installation
-
-To use with Claude Desktop, add the server config:
-
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "jenkins-server": {
-      "command": "/path/to/jenkins-server/build/index.js"
-    }
-  }
-}
-```
-
 ### Debugging
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+Since MCP servers communicate over stdio, you can use the MCP Inspector for debugging:
 
 ```bash
 npm run inspector
 ```
 
-The Inspector will provide a URL to access debugging tools in your browser.
+This will provide a URL to access debugging tools in your browser.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

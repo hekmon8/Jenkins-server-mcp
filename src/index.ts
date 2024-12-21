@@ -67,7 +67,7 @@ class JenkinsServer {
             properties: {
               jobPath: {
                 type: 'string',
-                description: 'Path to the Jenkins job (e.g., "view/SMB1/job/ap_tdmp_rtl_ax1500_debug")',
+                description: 'Path to the Jenkins job (e.g., "view/xxx_debug")',
               },
               buildNumber: {
                 type: 'string',
