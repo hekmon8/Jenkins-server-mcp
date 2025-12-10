@@ -244,20 +244,58 @@ class JenkinsServer {
   }
 
   private async triggerBuild(args: any) {
-    const params = new URLSearchParams();
-    if (args.parameters) {
-      Object.entries(args.parameters).forEach(([key, value]) => {
-        params.append(key, String(value));
-      });
+    const jobPath = args.jobPath;
+    const parameters = args.parameters || null;
+  
+    // Get CSRF crumb
+    const crumbResp = await this.axiosInstance.get('/crumbIssuer/api/json');
+    const crumbField = crumbResp.data.crumbRequestField;
+    const crumbValue = crumbResp.data.crumb;
+  
+    // CASE 1: No parameters → use /build
+    if (!parameters || Object.keys(parameters).length === 0) {
+      await this.axiosInstance.post(
+        `/${jobPath}/build`,
+        {},
+        {
+          headers: {
+            [crumbField]: crumbValue,
+          },
+        }
+      );
+  
+      return {
+        content: [
+          {
+            type: 'text',
+            text: 'Pipeline/Freestyle job triggered successfully using /build',
+          },
+        ],
+      };
     }
-
-    await this.axiosInstance.post(`/${args.jobPath}/buildWithParameters`, params);
-
+  
+    // CASE 2: Parameters present → use /buildWithParameters
+    const body = new URLSearchParams();
+    Object.entries(parameters).forEach(([key, value]) => {
+      body.append(key, String(value));
+    });
+  
+    await this.axiosInstance.post(
+      `/${jobPath}/buildWithParameters`,
+      body,
+      {
+        headers: {
+          [crumbField]: crumbValue,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+  
     return {
       content: [
         {
           type: 'text',
-          text: 'Build triggered successfully',
+          text: 'Parameterized job triggered successfully using /buildWithParameters',
         },
       ],
     };
