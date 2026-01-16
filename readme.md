@@ -1,3 +1,13 @@
+## Sponsors
+
+| Website | Description |
+|---------|-------------|
+| [productdirs.com](https://productdirs.com) | Free AI SaaS Product Directory & Listing Platform - Submit your AI products and SaaS tools for free exposure and discovery |
+| [thistools.app](https://thistools.app) | Free AI Tools & SaaS Directory for Developers - Discover and list innovative AI-powered tools and SaaS applications |
+| [aiimgcombiner.com](https://aiimgcombiner.com) | Free AI-Powered Image Merging & Combination Tool - Merge and combine multiple images effortlessly with AI technology |
+
+---
+
 # Jenkins Server MCP
 
 A Model Context Protocol (MCP) server that provides tools for interacting with Jenkins CI/CD servers. This server enables AI assistants to check build statuses, trigger builds, and retrieve build logs through a standardized interface.
