@@ -1,5 +1,13 @@
 # Jenkins Server MCP
 
+## Sponsors
+
+| Sponsor |
+|---------|
+| [productdirs.com](https://productdirs.com) |
+| [thistools.app](https://thistools.app) |
+| [aiimgcombiner.com](https://aiimgcombiner.com) |
+
 A Model Context Protocol (MCP) server that provides tools for interacting with Jenkins CI/CD servers. This server enables AI assistants to check build statuses, trigger builds, and retrieve build logs through a standardized interface.
 
 ## Installation
