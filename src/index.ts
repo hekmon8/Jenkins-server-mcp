@@ -38,11 +38,14 @@ class JenkinsServer {
 
     const hasDangerousScheme =
       /^(https?|file|ftp|ws|wss|gopher):/i.test(normalizedJobPath);
+    const hasPathTraversal = /(^|[\\/])\.\.([\\/]|$)/.test(normalizedJobPath);
 
     if (
+      normalizedJobPath.startsWith('//') ||
       normalizedJobPath.startsWith('/') ||
       normalizedJobPath.startsWith('\\') ||
-      hasDangerousScheme
+      hasDangerousScheme ||
+      hasPathTraversal
     ) {
       throw new McpError(
         ErrorCode.InvalidParams,
