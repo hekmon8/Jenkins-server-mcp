@@ -30,14 +30,19 @@ class JenkinsServer {
       throw new McpError(ErrorCode.InvalidParams, 'jobPath must be a string');
     }
 
-    if (!jobPath) {
+    const normalizedJobPath = jobPath.trim();
+
+    if (!normalizedJobPath) {
       throw new McpError(ErrorCode.InvalidParams, 'jobPath is required');
     }
 
+    const hasDangerousScheme =
+      /^(https?|file|ftp|ws|wss|gopher):/i.test(normalizedJobPath);
+
     if (
-      jobPath.startsWith('/') ||
-      jobPath.startsWith('\\') ||
-      /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(jobPath)
+      normalizedJobPath.startsWith('/') ||
+      normalizedJobPath.startsWith('\\') ||
+      hasDangerousScheme
     ) {
       throw new McpError(
         ErrorCode.InvalidParams,
@@ -45,7 +50,7 @@ class JenkinsServer {
       );
     }
 
-    return jobPath;
+    return normalizedJobPath;
   }
 
   constructor() {
