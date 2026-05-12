@@ -78,7 +78,7 @@ const result = await mcpClient.useTool("jenkins-server", "get_build_status", {
 Input Schema:
 ```json
 {
-  "jobPath": "string",  // Relative Jenkins job path (must not start with "/" or include a URL scheme)
+  "jobPath": "string",  // Relative Jenkins job path (must not start with "/", "\\", or include a URL scheme)
   "buildNumber": "string"  // Optional, build number or "lastBuild"
 }
 ```
@@ -101,7 +101,7 @@ const result = await mcpClient.useTool("jenkins-server", "trigger_build", {
 Input Schema:
 ```json
 {
-  "jobPath": "string",  // Relative Jenkins job path (must not start with "/" or include a URL scheme)
+  "jobPath": "string",  // Relative Jenkins job path (must not start with "/", "\\", or include a URL scheme)
   "parameters": {
     // Build parameters as key-value pairs
   }
@@ -123,7 +123,7 @@ const result = await mcpClient.useTool("jenkins-server", "get_build_log", {
 Input Schema:
 ```json
 {
-  "jobPath": "string",  // Relative Jenkins job path (must not start with "/" or include a URL scheme)
+  "jobPath": "string",  // Relative Jenkins job path (must not start with "/", "\\", or include a URL scheme)
   "buildNumber": "string"  // Build number or "lastBuild"
 }
 ```
