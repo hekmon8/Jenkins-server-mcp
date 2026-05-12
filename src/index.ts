@@ -41,13 +41,19 @@ class JenkinsServer {
         normalizedJobPath
       );
     const hasPathTraversal = /(^|[\\/])\.\.([\\/]|$)/.test(normalizedJobPath);
+    const lowerJobPath = normalizedJobPath.toLowerCase();
+    const hasEncodedTraversalOrSeparator =
+      lowerJobPath.includes('%2f') ||
+      lowerJobPath.includes('%5c') ||
+      lowerJobPath.includes('%2e%2e');
 
     if (
       normalizedJobPath.startsWith('//') ||
       normalizedJobPath.startsWith('/') ||
       normalizedJobPath.startsWith('\\') ||
       hasDangerousScheme ||
-      hasPathTraversal
+      hasPathTraversal ||
+      hasEncodedTraversalOrSeparator
     ) {
       throw new McpError(
         ErrorCode.InvalidParams,
