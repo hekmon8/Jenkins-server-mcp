@@ -37,7 +37,9 @@ class JenkinsServer {
     }
 
     const hasDangerousScheme =
-      /^(https?|file|ftp|ws|wss|gopher):/i.test(normalizedJobPath);
+      /^(https?|file|ftp|ws|wss|gopher|data|javascript|vbscript):/i.test(
+        normalizedJobPath
+      );
     const hasPathTraversal = /(^|[\\/])\.\.([\\/]|$)/.test(normalizedJobPath);
 
     if (
