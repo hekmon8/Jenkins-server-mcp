@@ -25,6 +25,45 @@ class JenkinsServer {
   private server: Server;
   private axiosInstance: any;
 
+  private validateJobPath(jobPath: unknown): string {
+    if (typeof jobPath !== 'string') {
+      throw new McpError(ErrorCode.InvalidParams, 'jobPath must be a string');
+    }
+
+    const normalizedJobPath = jobPath.trim();
+
+    if (!normalizedJobPath) {
+      throw new McpError(ErrorCode.InvalidParams, 'jobPath is required');
+    }
+
+    const hasDangerousScheme =
+      /^(https?|file|ftp|ws|wss|gopher|data|javascript|vbscript):/i.test(
+        normalizedJobPath
+      );
+    const hasPathTraversal = /(^|[\\/])\.\.([\\/]|$)/.test(normalizedJobPath);
+    const lowerJobPath = normalizedJobPath.toLowerCase();
+    const hasEncodedTraversalOrSeparator =
+      lowerJobPath.includes('%2f') ||
+      lowerJobPath.includes('%5c') ||
+      lowerJobPath.includes('%2e%2e');
+
+    if (
+      normalizedJobPath.startsWith('//') ||
+      normalizedJobPath.startsWith('/') ||
+      normalizedJobPath.startsWith('\\') ||
+      hasDangerousScheme ||
+      hasPathTraversal ||
+      hasEncodedTraversalOrSeparator
+    ) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        'jobPath must be a relative Jenkins path'
+      );
+    }
+
+    return normalizedJobPath;
+  }
+
   constructor() {
     this.server = new Server(
       {
@@ -218,9 +257,10 @@ class JenkinsServer {
   // --------- Existing tools ---------
 
   private async getBuildStatus(args: any) {
+    const jobPath = this.validateJobPath(args?.jobPath);
     const buildNumber = args.buildNumber || 'lastBuild';
     const response = await this.axiosInstance.get(
-      `/${args.jobPath}/${buildNumber}/api/json`
+      `/${jobPath}/${buildNumber}/api/json`
     );
 
     return {
@@ -244,7 +284,7 @@ class JenkinsServer {
   }
 
   private async triggerBuild(args: any) {
-    const jobPath = args.jobPath;
+    const jobPath = this.validateJobPath(args?.jobPath);
     const parameters = args.parameters || null;
   
     // Get CSRF crumb
@@ -302,8 +342,9 @@ class JenkinsServer {
   }
 
   private async getBuildLog(args: any) {
+    const jobPath = this.validateJobPath(args?.jobPath);
     const response = await this.axiosInstance.get(
-      `/${args.jobPath}/${args.buildNumber}/consoleText`
+      `/${jobPath}/${args.buildNumber}/consoleText`
     );
 
     return {
@@ -398,15 +439,10 @@ class JenkinsServer {
 
   // Get console log of last failed build for a job
   private async getFailedBuildLog(args: any) {
-    if (!args?.jobPath) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        'jobPath is required for get_failed_build_log'
-      );
-    }
+    const jobPath = this.validateJobPath(args?.jobPath);
 
     // Get job info including lastFailedBuild
-    const jobInfo = await this.axiosInstance.get(`/${args.jobPath}/api/json`, {
+    const jobInfo = await this.axiosInstance.get(`/${jobPath}/api/json`, {
       params: {
         tree: 'name,url,lastFailedBuild[number,url]',
       },
@@ -427,7 +463,7 @@ class JenkinsServer {
     const buildNumber = lastFailedBuild.number;
 
     const logResponse = await this.axiosInstance.get(
-      `/${args.jobPath}/${buildNumber}/consoleText`
+      `/${jobPath}/${buildNumber}/consoleText`
     );
 
     return {
